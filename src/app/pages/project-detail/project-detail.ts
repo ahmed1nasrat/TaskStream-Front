@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { finalize, catchError } from 'rxjs/operators';
+import Swal from 'sweetalert2';
 import { ProjectService } from '../../services/project-service';
 import { TaskService } from '../../services/task-service';
 import { ProjectResponseDto } from '../../models/project';
@@ -144,10 +145,30 @@ export class ProjectDetail implements OnInit {
   }
 
   deleteTask(taskId: number): void {
-    if (!confirm('Delete this task?')) return;
-    this.taskService.delete(taskId).subscribe({
-      next: () => { this.tasks = this.tasks.filter(t => t.id !== taskId); },
-      error: (err) => { console.error('Delete task error', err); this.error = 'Failed to delete task'; },
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: { confirmButton: 'btn btn-success', cancelButton: 'btn btn-danger' },
+      buttonsStyling: false,
+    });
+    swalWithBootstrapButtons.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'No, cancel!',
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.taskService.delete(taskId).subscribe({
+          next: () => {
+            swalWithBootstrapButtons.fire({ title: 'Deleted!', text: 'The task has been deleted.', icon: 'success' });
+            this.tasks = this.tasks.filter(t => t.id !== taskId);
+          },
+          error: (err) => { console.error('Delete task error', err); this.error = 'Failed to delete task'; },
+        });
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        swalWithBootstrapButtons.fire({ title: 'Cancelled', text: 'Your task is safe :)', icon: 'error' });
+      }
     });
   }
 

@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { forkJoin, of } from 'rxjs';
 import { finalize, catchError } from 'rxjs/operators';
+import Swal from 'sweetalert2';
 import { ProjectService } from '../../services/project-service';
 import { TaskService } from '../../services/task-service';
 import { ProjectResponseDto, CreateProjectDto, UpdateProjectDto } from '../../models/project';
@@ -85,6 +86,7 @@ export class Projects implements OnInit {
   }
 
   openEditModal(project: ProjectResponseDto, event: Event): void {
+    event.preventDefault();
     event.stopPropagation();
     this.editingProject = project;
     this.projectForm.setValue({ name: project.name, description: project.description });
@@ -110,11 +112,32 @@ export class Projects implements OnInit {
   }
 
   deleteProject(id: number, event: Event): void {
+    event.preventDefault();
     event.stopPropagation();
-    if (!confirm('Delete this project and all its tasks?')) return;
-    this.projectService.delete(id).subscribe({
-      next: () => this.loadData(),
-      error: (err) => { console.error('Delete project error', err); this.error = 'Failed to delete project'; },
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: { confirmButton: 'btn btn-success', cancelButton: 'btn btn-danger' },
+      buttonsStyling: false,
+    });
+    swalWithBootstrapButtons.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'No, cancel!',
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.projectService.delete(id).subscribe({
+          next: () => {
+            swalWithBootstrapButtons.fire({ title: 'Deleted!', text: 'The project has been deleted.', icon: 'success' });
+            this.loadData();
+          },
+          error: (err) => { console.error('Delete project error', err); this.error = 'Failed to delete project'; },
+        });
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        swalWithBootstrapButtons.fire({ title: 'Cancelled', text: 'Your project is safe :)', icon: 'error' });
+      }
     });
   }
 }
