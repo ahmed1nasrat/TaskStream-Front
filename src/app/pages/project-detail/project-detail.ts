@@ -145,11 +145,7 @@ export class ProjectDetail implements OnInit {
   }
 
   deleteTask(taskId: number): void {
-    const swalWithBootstrapButtons = Swal.mixin({
-      customClass: { confirmButton: 'btn btn-success', cancelButton: 'btn btn-danger' },
-      buttonsStyling: false,
-    });
-    swalWithBootstrapButtons.fire({
+    Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
       icon: 'warning',
@@ -157,17 +153,17 @@ export class ProjectDetail implements OnInit {
       confirmButtonText: 'Yes, delete it!',
       cancelButtonText: 'No, cancel!',
       reverseButtons: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
     }).then((result) => {
       if (result.isConfirmed) {
         this.taskService.delete(taskId).subscribe({
           next: () => {
-            swalWithBootstrapButtons.fire({ title: 'Deleted!', text: 'The task has been deleted.', icon: 'success' });
+            Swal.fire({ title: 'Deleted!', text: 'The task has been deleted.', icon: 'success' });
             this.tasks = this.tasks.filter(t => t.id !== taskId);
           },
           error: (err) => { console.error('Delete task error', err); this.error = 'Failed to delete task'; },
         });
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        swalWithBootstrapButtons.fire({ title: 'Cancelled', text: 'Your task is safe :)', icon: 'error' });
       }
     });
   }

@@ -114,11 +114,7 @@ export class Projects implements OnInit {
   deleteProject(id: number, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    const swalWithBootstrapButtons = Swal.mixin({
-      customClass: { confirmButton: 'btn btn-success', cancelButton: 'btn btn-danger' },
-      buttonsStyling: false,
-    });
-    swalWithBootstrapButtons.fire({
+    Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
       icon: 'warning',
@@ -126,17 +122,17 @@ export class Projects implements OnInit {
       confirmButtonText: 'Yes, delete it!',
       cancelButtonText: 'No, cancel!',
       reverseButtons: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
     }).then((result) => {
       if (result.isConfirmed) {
         this.projectService.delete(id).subscribe({
           next: () => {
-            swalWithBootstrapButtons.fire({ title: 'Deleted!', text: 'The project has been deleted.', icon: 'success' });
+            Swal.fire({ title: 'Deleted!', text: 'The project has been deleted.', icon: 'success' });
             this.loadData();
           },
           error: (err) => { console.error('Delete project error', err); this.error = 'Failed to delete project'; },
         });
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        swalWithBootstrapButtons.fire({ title: 'Cancelled', text: 'Your project is safe :)', icon: 'error' });
       }
     });
   }
