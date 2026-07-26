@@ -19,13 +19,7 @@
     </nav>
 
     <div class="px-3 py-3 border-t border-outline-variant space-y-0.5">
-      @for (item of secondaryNav; track item.route) {
-        <a [routerLink]="item.route" routerLinkActive="bg-primary-container/10 text-primary shadow-sm"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface">
-          <span class="material-symbols-outlined text-lg">{{ item.icon }}</span>
-          {{ item.label }}
-        </a>
-      }
+   
 
       <div class="flex items-center gap-3 px-3 py-3 mt-2 border-t border-outline-variant/40">
         <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-on-primary-container shrink-0">
@@ -33,7 +27,7 @@
         </div>
         <div class="flex-1 min-w-0">
           <p class="font-label-md text-label-md text-on-surface truncate">{{ userName }}</p>
-          <p class="font-label-sm text-label-sm text-outline">Free Plan</p>
+          
         </div>
         <button (click)="logout()" class="p-1.5 rounded-lg text-outline hover:text-error hover:bg-error-container/30 transition-colors" title="Logout">
           <span class="material-symbols-outlined text-lg">logout</span>
@@ -54,15 +48,7 @@
       </div>
 
       <div class="flex items-center gap-2 md:gap-3">
-        <div class="hidden md:flex items-center gap-2 bg-surface-container-high rounded-lg px-3 py-2 text-outline group focus-within:ring-2 focus-within:ring-primary-container/30 focus-within:bg-surface-container-lowest transition-all">
-          <span class="material-symbols-outlined text-lg group-focus-within:text-primary transition-colors">search</span>
-          <input class="bg-transparent border-none outline-none font-body-md text-body-md text-on-surface placeholder:text-outline/50 w-32 lg:w-48" placeholder="Search projects..." />
-        </div>
-
-        <button class="relative p-2 rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant">
-          <span class="material-symbols-outlined text-lg">notifications</span>
-          <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface-container-lowest"></span>
-        </button>
+      
 
         <div class="hidden md:flex items-center gap-2 pl-2 border-l border-outline-variant cursor-pointer">
           <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-on-primary-container">

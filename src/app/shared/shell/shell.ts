@@ -25,13 +25,11 @@ export class Shell {
     { icon: 'dashboard', label: 'Dashboard', route: '/dashboard' },
     { icon: 'folder', label: 'Projects', route: '/projects' },
     { icon: 'checklist', label: 'Tasks', route: '/tasks' },
-    { icon: 'calendar_month', label: 'Calendar', route: '/calendar' },
-    { icon: 'chat', label: 'Messages', route: '/messages' },
+
   ];
 
   secondaryNav = [
-    { icon: 'settings', label: 'Settings', route: '/settings' },
-    { icon: 'help', label: 'Help Center', route: '/help' },
+    
   ];
 
   mobileNav = [
