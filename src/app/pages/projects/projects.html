@@ -1,0 +1,130 @@
+@if (loading) {
+  <div class="flex items-center justify-center h-64">
+    <div class="flex flex-col items-center gap-3">
+      <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+      </svg>
+      <span class="font-body-md text-body-md text-outline">Loading projects...</span>
+    </div>
+  </div>
+} @else if (error) {
+  <div class="p-4 rounded-lg bg-error-container text-on-error-container font-body-md text-body-md">{{ error }}</div>
+} @else if (projects.length === 0) {
+  <div class="max-w-2xl mx-auto flex flex-col items-center justify-center text-center py-16 md:py-24">
+    <div class="w-24 h-24 rounded-2xl bg-surface-container-high flex items-center justify-center mb-6">
+      <span class="material-symbols-outlined text-4xl text-outline">folder_off</span>
+    </div>
+    <h2 class="text-headline-sm font-headline-sm text-on-surface mb-2">No projects yet</h2>
+    <p class="font-body-md text-body-md text-on-surface-variant max-w-sm mb-8">Create your first project to start organizing your team's tasks and workflows.</p>
+    <div class="flex gap-3">
+      <button (click)="openCreateModal()" class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white rounded-lg font-label-md text-label-md shadow-lg hover:shadow-xl active:scale-[0.98] transition-all">
+        <span class="material-symbols-outlined text-lg">add</span>
+        Create Project
+      </button>
+    </div>
+    <div class="mt-8 p-4 bg-surface-container-lowest border border-outline-variant rounded-xl flex items-start gap-3 max-w-md">
+      <span class="material-symbols-outlined text-primary shrink-0">lightbulb</span>
+      <p class="font-body-md text-body-md text-on-surface-variant text-left"><strong class="text-on-surface">Tip:</strong> You can organize projects by team, sprint, or initiative. Each project can contain multiple tasks with deadlines and priorities.</p>
+    </div>
+  </div>
+} @else {
+  <div class="max-w-6xl mx-auto space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-headline-md font-headline-md text-on-surface">Projects</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant mt-1">{{ projects.length }} total projects</p>
+      </div>
+      <button (click)="openCreateModal()" class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white rounded-lg font-label-md text-label-md shadow-md hover:shadow-lg hover:bg-[#1e4db7] active:scale-[0.98] transition-all shrink-0 self-start sm:self-auto">
+        <span class="material-symbols-outlined text-lg">add</span>
+        New Project
+      </button>
+    </div>
+
+    @if (error) {
+      <div class="p-3 rounded-lg bg-error-container text-on-error-container font-body-md text-body-md">{{ error }}</div>
+    }
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      @for (project of projects; track project.id) {
+        <a [routerLink]="['/projects', project.id]" class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden transition-all hover:shadow-md hover:border-primary-container/30 group cursor-pointer">
+          <div class="p-5">
+            <div class="flex items-start justify-between mb-3">
+              <div class="w-10 h-10 rounded-lg bg-primary-container/10 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-primary text-xl">description</span>
+              </div>
+              <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                <button (click)="openEditModal(project, $event)" class="p-1 rounded-md hover:bg-secondary-container/40 text-outline hover:text-secondary transition-all" title="Edit project">
+                  <span class="material-symbols-outlined text-lg">edit</span>
+                </button>
+                <button (click)="deleteProject(project.id, $event)" class="p-1 rounded-md hover:bg-error-container/30 text-outline hover:text-error transition-all" title="Delete project">
+                  <span class="material-symbols-outlined text-lg">delete</span>
+                </button>
+              </div>
+            </div>
+
+            <h3 class="font-headline-sm text-headline-sm text-on-surface mb-1 group-hover:text-primary transition-colors">{{ project.name }}</h3>
+            <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4">{{ project.description || 'No description' }}</p>
+
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-label-sm text-label-sm px-2.5 py-1 rounded-full" [class]="getStatus(project.id).class">
+                {{ getStatus(project.id).label }}
+              </span>
+              <span class="font-label-sm text-label-sm text-outline">{{ getTaskCount(project.id) }} tasks</span>
+            </div>
+
+            <div class="w-full bg-surface-container-high rounded-full h-1.5 overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-500" [style.width.%]="getProgress(project.id)"
+                   [class.bg-tertiary]="getProgress(project.id) === 100"
+                   [class.bg-primary-container]="getProgress(project.id) < 100">
+              </div>
+            </div>
+            <p class="font-label-sm text-label-sm text-outline mt-1.5">{{ getProgress(project.id) }}% complete</p>
+          </div>
+          <div class="px-5 py-3 bg-surface-container-low border-t border-outline-variant/50 flex items-center justify-between">
+            <span class="font-label-sm text-label-sm text-outline">Created {{ project.createdAt | date:'MMM d, y' }}</span>
+            <span class="material-symbols-outlined text-lg text-outline group-hover:text-primary transition-colors">arrow_forward</span>
+          </div>
+        </a>
+      }
+    </div>
+  </div>
+}
+
+@if (showModal) {
+  <div class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4" (click)="showModal = false">
+    <div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-2xl w-full max-w-md p-6" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-headline-sm text-headline-sm text-on-surface">{{ editingProject ? 'Edit Project' : 'New Project' }}</h2>
+        <button (click)="showModal = false" class="p-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form [formGroup]="projectForm" (ngSubmit)="saveProject()" class="space-y-4">
+        <div>
+          <label class="font-label-md text-label-md text-on-surface mb-1.5 block" for="proj-name">Project Name</label>
+          <input class="w-full px-3 py-2.5 rounded-lg border border-outline-variant focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none transition-all font-body-md text-body-md bg-white" id="proj-name" formControlName="name" placeholder="Enter project name" />
+        </div>
+        <div>
+          <label class="font-label-md text-label-md text-on-surface mb-1.5 block" for="proj-desc">Description</label>
+          <textarea class="w-full px-3 py-2.5 rounded-lg border border-outline-variant focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none transition-all font-body-md text-body-md bg-white min-h-[100px]" id="proj-desc" formControlName="description" placeholder="Describe the project..."></textarea>
+        </div>
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" (click)="showModal = false" class="px-4 py-2 rounded-lg border border-outline-variant font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-colors">Cancel</button>
+          <button type="submit" [disabled]="projectForm.invalid || saving" class="px-5 py-2 bg-primary-container text-white rounded-lg font-label-md text-label-md shadow-md hover:bg-[#1e4db7] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            @if (saving) {
+              <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+            } @else {
+              <span class="material-symbols-outlined text-lg">{{ editingProject ? 'save' : 'add' }}</span>
+            }
+            {{ editingProject ? 'Save Changes' : 'Create Project' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

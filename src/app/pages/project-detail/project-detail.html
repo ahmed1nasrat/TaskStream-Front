@@ -1,0 +1,210 @@
+@if (loading) {
+  <div class="flex items-center justify-center h-64">
+    <div class="flex flex-col items-center gap-3">
+      <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+      </svg>
+      <span class="font-body-md text-body-md text-outline">Loading project...</span>
+    </div>
+  </div>
+} @else if (error) {
+  <div class="max-w-6xl mx-auto space-y-4">
+    <div class="p-4 rounded-lg bg-error-container text-on-error-container font-body-md text-body-md">{{ error }}</div>
+    <a routerLink="/projects" class="inline-flex items-center gap-1.5 font-label-md text-label-md text-primary hover:underline">
+      <span class="material-symbols-outlined text-lg">arrow_back</span>
+      Back to Projects
+    </a>
+  </div>
+} @else if (project) {
+  <div class="max-w-6xl mx-auto space-y-6">
+    <nav class="flex items-center gap-2 text-label-sm font-label-sm">
+      <a routerLink="/projects" class="text-outline hover:text-primary transition-colors">Projects</a>
+      <span class="material-symbols-outlined text-base text-outline">chevron_right</span>
+      <span class="text-on-surface font-semibold">{{ project.name }}</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-6">
+        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-5 md:p-6">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <h1 class="text-headline-md font-headline-md text-on-surface mb-2">{{ project.name }}</h1>
+              <p class="font-body-md text-body-md text-on-surface-variant">{{ project.description || 'No description provided.' }}</p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-x-6 gap-y-2 pt-4 border-t border-outline-variant mt-4">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-lg text-outline">calendar_today</span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">Created {{ project.createdAt | date:'MMM d, y' }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-lg text-outline">checklist</span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">{{ tasks.length }} tasks</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-lg text-outline">trending_up</span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">{{ getProgress() }}% complete</span>
+            </div>
+          </div>
+
+          <div class="mt-4 w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
+            <div class="h-full rounded-full transition-all duration-700" [style.width.%]="getProgress()"
+                 [class.bg-tertiary]="getProgress() === 100"
+                 [class.bg-primary-container]="getProgress() < 100">
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-4 border-b border-outline-variant">
+            <h2 class="font-headline-sm text-headline-sm text-on-surface">Tasks</h2>
+            <button (click)="openCreateModal()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-container text-white rounded-lg font-label-md text-label-md shadow-md hover:bg-[#1e4db7] active:scale-[0.98] transition-all">
+              <span class="material-symbols-outlined text-lg">add</span>
+              Add Task
+            </button>
+          </div>
+
+          @if (tasks.length === 0) {
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+              <span class="material-symbols-outlined text-4xl text-outline mb-3">playlist_add</span>
+              <p class="font-body-md text-body-md text-on-surface-variant">No tasks in this project yet.</p>
+              <button (click)="openCreateModal()" class="mt-3 font-label-md text-label-md text-primary hover:underline">Create the first task</button>
+            </div>
+          } @else {
+            <div class="space-y-1 p-4">
+              @for (task of tasks; track task.id) {
+                <div class="flex items-center gap-3 p-3.5 rounded-lg hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant group">
+                  <button (click)="updateStatus(task)" class="shrink-0 text-outline hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-lg" [class.text-tertiary]="task.status === 'Done'">
+                      {{ task.status === 'Done' ? 'check_circle' : task.status === 'InProgress' ? 'radio_button_partial' : 'radio_button_unchecked' }}
+                    </span>
+                  </button>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                      <p class="font-label-md text-label-md text-on-surface truncate" [class.line-through]="task.status === 'Done'" [class.text-outline]="task.status === 'Done'">{{ task.title }}</p>
+                      <span class="font-label-sm text-label-sm px-2 py-0.5 rounded shrink-0" [class]="priorityClass(task.priority)">{{ task.priority }}</span>
+                    </div>
+                    <div class="flex items-center gap-3 mt-0.5">
+                      <span class="font-label-sm text-label-sm text-outline">{{ task.dueDate | date:'MMM d, y' }}</span>
+                      <span class="font-label-sm text-label-sm px-2 py-0.5 rounded" [class]="statusClass(task.status)">{{ task.status }}</span>
+                    </div>
+                  </div>
+                  <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <button (click)="openEditModal(task)" class="p-1.5 rounded-lg hover:bg-secondary-container/40 text-outline hover:text-secondary transition-all" title="Edit task">
+                      <span class="material-symbols-outlined text-lg">edit</span>
+                    </button>
+                    <button (click)="deleteTask(task.id)" class="p-1.5 rounded-lg hover:bg-error-container/30 text-outline hover:text-error transition-all" title="Delete task">
+                      <span class="material-symbols-outlined text-lg">delete</span>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-5">
+          <h3 class="font-label-md text-label-md text-outline uppercase tracking-wide mb-4">Project Info</h3>
+          <div class="space-y-4">
+            <div>
+              <p class="font-label-sm text-label-sm text-outline mb-1">Status</p>
+              <span class="font-label-sm text-label-sm px-3 py-1.5 rounded-full bg-primary-container/10 text-primary">
+                {{ getProgress() === 100 ? 'Completed' : getProgress() > 0 ? 'In Progress' : 'Not Started' }}
+              </span>
+            </div>
+            <div>
+              <p class="font-label-sm text-label-sm text-outline mb-1">Created</p>
+              <p class="font-label-md text-label-md text-on-surface">{{ project.createdAt | date:'MMMM d, y' }}</p>
+            </div>
+            <div>
+              <p class="font-label-sm text-label-sm text-outline mb-1">Tasks</p>
+              <p class="font-label-md text-label-md text-on-surface">{{ tasks.length }} total</p>
+              <div class="flex items-center gap-2 mt-1">
+                <div class="flex-1 bg-surface-container-high rounded-full h-1.5 overflow-hidden">
+                  <div class="h-full rounded-full bg-tertiary transition-all duration-500" [style.width.%]="getProgress()"></div>
+                </div>
+                <span class="font-label-sm text-label-sm text-outline">{{ getProgress() }}%</span>
+              </div>
+            </div>
+            <div class="pt-3 border-t border-outline-variant">
+              <p class="font-label-sm text-label-sm text-outline mb-2">Quick Stats</p>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="bg-surface-container-high rounded-lg p-3 text-center">
+                  <p class="text-headline-sm font-headline-sm text-on-surface">{{ tasks.filter(t => t.status === 'ToDo').length }}</p>
+                  <p class="font-label-sm text-label-sm text-outline">To Do</p>
+                </div>
+                <div class="bg-surface-container-high rounded-lg p-3 text-center">
+                  <p class="text-headline-sm font-headline-sm text-on-surface">{{ tasks.filter(t => t.status === 'InProgress').length }}</p>
+                  <p class="font-label-sm text-label-sm text-outline">In Progress</p>
+                </div>
+                <div class="bg-surface-container-high rounded-lg p-3 text-center col-span-2">
+                  <p class="text-headline-sm font-headline-sm text-on-surface">{{ tasks.filter(t => t.status === 'Done').length }}</p>
+                  <p class="font-label-sm text-label-sm text-outline">Done</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showModal) {
+  <div class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4" (click)="showModal = false">
+    <div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-2xl w-full max-w-lg p-6" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-headline-sm text-headline-sm text-on-surface">{{ editingTask ? 'Edit Task' : 'New Task' }}</h2>
+        <button (click)="showModal = false" class="p-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form [formGroup]="taskForm" (ngSubmit)="saveTask()" class="space-y-4">
+        <div>
+          <label class="font-label-md text-label-md text-on-surface mb-1.5 block" for="detail-title">Title</label>
+          <input class="w-full px-3 py-2.5 rounded-lg border border-outline-variant focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none transition-all font-body-md text-body-md bg-white" id="detail-title" formControlName="title" placeholder="Enter task title" />
+        </div>
+        <div>
+          <label class="font-label-md text-label-md text-on-surface mb-1.5 block" for="detail-desc">Description</label>
+          <textarea class="w-full px-3 py-2.5 rounded-lg border border-outline-variant focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none transition-all font-body-md text-body-md bg-white min-h-[80px]" id="detail-desc" formControlName="description" placeholder="Optional description"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="font-label-md text-label-md text-on-surface mb-1.5 block" for="detail-priority">Priority</label>
+            <div class="relative">
+              <select class="appearance-none w-full px-3 py-2.5 rounded-lg border border-outline-variant bg-white font-body-md text-body-md text-on-surface outline-none focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 transition-all cursor-pointer" id="detail-priority" formControlName="priority">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none">expand_more</span>
+            </div>
+          </div>
+          <div>
+            <label class="font-label-md text-label-md text-on-surface mb-1.5 block" for="detail-due">Due Date</label>
+            <input class="w-full px-3 py-2.5 rounded-lg border border-outline-variant focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none transition-all font-body-md text-body-md bg-white" id="detail-due" formControlName="dueDate" type="date" />
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" (click)="showModal = false" class="px-4 py-2 rounded-lg border border-outline-variant font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-colors">Cancel</button>
+          <button type="submit" [disabled]="taskForm.invalid || saving" class="px-5 py-2 bg-primary-container text-white rounded-lg font-label-md text-label-md shadow-md hover:bg-[#1e4db7] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            @if (saving) {
+              <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+            } @else {
+              <span class="material-symbols-outlined text-lg">{{ editingTask ? 'save' : 'add' }}</span>
+            }
+            {{ editingTask ? 'Save Changes' : 'Create Task' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

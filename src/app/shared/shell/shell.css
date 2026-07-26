@@ -1,0 +1,10 @@
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0.5rem);
+}
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.sidebar-scroll:hover {
+  scrollbar-color: #c3c6d7 transparent;
+}

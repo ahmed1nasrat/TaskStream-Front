@@ -1,0 +1,157 @@
+<main class="min-h-screen flex items-center justify-center p-md md:p-lg relative overflow-hidden bg-background">
+  <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-to-bl from-primary/5 to-transparent rounded-full blur-3xl -z-10 pointer-events-none"></div>
+  <div class="absolute bottom-0 left-0 w-1/3 h-1/3 bg-gradient-to-tr from-secondary-container/20 to-transparent rounded-full blur-3xl -z-10 pointer-events-none"></div>
+
+  <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 bg-surface-container-lowest rounded-xl border border-outline-variant shadow-lg overflow-hidden">
+    <div class="hidden md:flex flex-col justify-between p-2xl bg-surface-container-low relative overflow-hidden border-r border-outline-variant">
+      <div class="z-10">
+        <div class="flex items-center gap-2 mb-xl">
+          <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-md">
+            <span class="material-symbols-outlined text-on-primary">stream</span>
+          </div>
+          <span class="font-headline-sm text-headline-sm text-primary tracking-tight">TaskStream</span>
+        </div>
+        <h2 class="font-display-lg text-display-lg text-on-surface leading-tight mb-md max-w-xs">
+          Flow through your work effortlessly.
+        </h2>
+        <p class="font-body-lg text-body-lg text-on-surface-variant max-w-xs">
+          The premium workspace designed for high-performance engineering and creative teams.
+        </p>
+      </div>
+
+      <div class="relative w-full h-64 mt-xl rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuArmHKz_TjySEqwDEo9mNBDVBie-Eb0-_RIT9GiQP6u3ioiMKMCZLrOqIGUqOoADPiBatpljEa5ma6UpgepnPGcMrR-m_LyyiVZz9fdT5ifWOqwi3XMbpbw7RZ-fZB-RU64ivZb7hc1j8i4hCRbhSWFrkHRnTAlPbu8ZhdNGyl6Qsi4ZR5k4KeLu12JQzLPys4aceGYhnEhATQ96y_OkBEymUg8zWHke2rog0rZ4w8CgD-Qm3n89zl0D9d8E7rXuwgQF6frAgShqAI')"></div>
+        <div class="absolute top-8 left-8 w-32 h-12 bg-white/80 backdrop-blur-md rounded-lg border border-white/50 shadow-sm animate-pulse"></div>
+        <div class="absolute bottom-12 right-8 w-40 h-16 bg-white/60 backdrop-blur-sm rounded-lg border border-white/50 shadow-sm" style="animation-delay: 1s;"></div>
+      </div>
+
+      <div class="z-10 mt-xl">
+        <p class="font-label-sm text-label-sm text-outline">© 2024 TaskStream Inc. All rights reserved.</p>
+      </div>
+    </div>
+
+    <div class="p-xl md:p-2xl flex flex-col justify-center">
+      <div class="mb-xl">
+        <h1 class="font-headline-md text-headline-md text-on-surface mb-xs">Create an account</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">Join the next generation of task management.</p>
+      </div>
+
+      @if (error) {
+        <div class="mb-md p-3 rounded-lg bg-error-container text-on-error-container font-body-md text-body-md">
+          {{ error }}
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-md">
+        <div class="space-y-xs">
+          <label class="font-label-md text-label-md text-on-surface" for="userName">Full Name</label>
+          <div class="relative group">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">person</span>
+            <input
+              class="w-full pl-10 pr-4 py-2.5 bg-white border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline/50 transition-all"
+              id="userName"
+              formControlName="userName"
+              type="text"
+              placeholder="John Doe"
+            />
+          </div>
+        </div>
+
+        <div class="space-y-xs">
+          <label class="font-label-md text-label-md text-on-surface" for="email">Email</label>
+          <div class="relative group">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">mail</span>
+            <input
+              class="w-full pl-10 pr-4 py-2.5 bg-white border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline/50 transition-all"
+              id="email"
+              formControlName="email"
+              type="email"
+              placeholder="name@company.com"
+            />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-md">
+          <div class="space-y-xs">
+            <label class="font-label-md text-label-md text-on-surface" for="password">Password</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">lock</span>
+              <input
+                class="w-full pl-10 pr-4 py-2.5 bg-white border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline/50 transition-all"
+                id="password"
+                formControlName="password"
+                type="password"
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+          <div class="space-y-xs">
+            <label class="font-label-md text-label-md text-on-surface" for="confirmPassword">Confirm</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">security</span>
+              <input
+                class="w-full pl-10 pr-4 py-2.5 bg-white border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline/50 transition-all"
+                id="confirmPassword"
+                formControlName="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+        </div>
+
+        @if (form.errors?.['mismatch'] && form.get('confirmPassword')?.touched) {
+          <p class="font-label-sm text-label-sm text-error">Passwords do not match</p>
+        }
+
+        <div class="flex items-start gap-2 pt-xs">
+          <input class="mt-1 w-4 h-4 text-primary border-outline-variant rounded focus:ring-primary/20" id="terms" formControlName="terms" type="checkbox" />
+          <label class="font-label-sm text-label-sm text-on-surface-variant" for="terms">
+            I agree to the <a class="text-primary hover:underline" href="#">Terms of Service</a> and <a class="text-primary hover:underline" href="#">Privacy Policy</a>.
+          </label>
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="form.invalid || loading"
+          class="w-full bg-primary-container text-on-primary-container font-label-md text-label-md py-3 rounded-lg shadow-md hover:bg-primary transition-colors flex items-center justify-center gap-2 mt-md disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          @if (loading) {
+            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+          } @else {
+            Register
+            <span class="material-symbols-outlined">arrow_forward</span>
+          }
+        </button>
+      </form>
+
+      <div class="relative my-xl">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-outline-variant"></div>
+        </div>
+        <div class="relative flex justify-center text-label-sm">
+          <span class="bg-surface-container-lowest px-md text-outline">Or register with</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-md mb-xl">
+        <button class="flex items-center justify-center gap-2 py-2.5 bg-white border border-outline-variant rounded-lg hover:bg-surface-container-low transition-colors">
+          <span class="material-symbols-outlined text-[20px]">google</span>
+          <span class="font-label-md text-label-md">Google</span>
+        </button>
+        <button class="flex items-center justify-center gap-2 py-2.5 bg-white border border-outline-variant rounded-lg hover:bg-surface-container-low transition-colors">
+          <span class="material-symbols-outlined text-[20px]">terminal</span>
+          <span class="font-label-md text-label-md">GitHub</span>
+        </button>
+      </div>
+
+      <p class="text-center font-body-md text-body-md text-on-surface-variant">
+        Already have an account?
+        <a routerLink="/login" class="text-primary font-bold hover:underline ml-1">Login</a>
+      </p>
+    </div>
+  </div>
+</main>

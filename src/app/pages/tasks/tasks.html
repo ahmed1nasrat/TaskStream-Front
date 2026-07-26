@@ -1,0 +1,215 @@
+@if (loading) {
+  <div class="flex items-center justify-center h-64">
+    <div class="flex flex-col items-center gap-3">
+      <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+      </svg>
+      <span class="font-body-md text-body-md text-outline">Loading tasks...</span>
+    </div>
+  </div>
+} @else {
+  <div class="max-w-6xl mx-auto space-y-5">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-headline-md font-headline-md text-on-surface">Tasks</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant mt-1">{{ filteredTasks.length }} of {{ allTasks.length }} tasks</p>
+      </div>
+      <button (click)="openCreateModal()" class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white rounded-lg font-label-md text-label-md shadow-md hover:shadow-lg hover:bg-[#1e4db7] active:scale-[0.98] transition-all shrink-0 self-start sm:self-auto">
+        <span class="material-symbols-outlined text-lg">add</span>
+        New Task
+      </button>
+    </div>
+
+    @if (error) {
+      <div class="p-3 rounded-lg bg-error-container text-on-error-container font-body-md text-body-md">{{ error }}</div>
+    }
+
+    <div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden">
+      <div class="p-4 md:p-5 border-b border-outline-variant">
+        <div class="flex flex-wrap items-center gap-2">
+          @for (tab of ['all', 'active', 'completed']; track tab) {
+            <button (click)="setTab(tab)"
+              class="px-3.5 py-1.5 rounded-lg font-label-md text-label-md transition-all"
+              [class.bg-primary-container/10]="activeTab === tab"
+              [class.text-primary]="activeTab === tab"
+              [class.text-on-surface-variant]="activeTab !== tab"
+              [class.hover:bg-surface-container-high]="activeTab !== tab">
+              {{ tab === 'all' ? 'All Tasks' : tab === 'active' ? 'Active' : 'Completed' }}
+            </button>
+          }
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 mt-4">
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none">folder</span>
+            <select (change)="onFilterChange()" [(ngModel)]="selectedProject" class="appearance-none w-full min-w-[150px] pl-9 pr-8 py-2 rounded-lg border border-outline-variant bg-white font-body-md text-body-md text-on-surface outline-none focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 transition-all cursor-pointer">
+              <option value="">All Projects</option>
+              @for (project of projects; track project.id) {
+                <option [value]="project.id">{{ project.name }}</option>
+              }
+            </select>
+            <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none">expand_more</span>
+          </div>
+
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none">signal_cellular_alt</span>
+            <select (change)="onFilterChange()" [(ngModel)]="selectedPriority" class="appearance-none w-full min-w-[130px] pl-9 pr-8 py-2 rounded-lg border border-outline-variant bg-white font-body-md text-body-md text-on-surface outline-none focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 transition-all cursor-pointer">
+              <option value="">All Priority</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none">expand_more</span>
+          </div>
+        </div>
+      </div>
+
+      @if (filteredTasks.length === 0) {
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+          <span class="material-symbols-outlined text-4xl text-outline mb-3">task_alt</span>
+          <p class="font-body-md text-body-md text-on-surface-variant">No tasks found matching your filters.</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-surface-container-low border-b border-outline-variant">
+                <th class="text-left font-label-md text-label-md text-outline px-5 py-3.5 w-10"></th>
+                <th class="text-left font-label-md text-label-md text-outline px-4 py-3.5">Task</th>
+                <th class="text-left font-label-md text-label-md text-outline px-4 py-3.5 hidden md:table-cell">Project</th>
+                <th class="text-left font-label-md text-label-md text-outline px-4 py-3.5 hidden sm:table-cell">Due Date</th>
+                <th class="text-left font-label-md text-label-md text-outline px-4 py-3.5 hidden lg:table-cell">Priority</th>
+                <th class="text-left font-label-md text-label-md text-outline px-4 py-3.5">Status</th>
+                <th class="text-right font-label-md text-label-md text-outline px-5 py-3.5 w-24">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (task of pagedTasks; track task.id) {
+                <tr class="border-b border-outline-variant/50 hover:bg-surface-container-low transition-colors">
+                  <td class="px-5 py-3.5">
+                    <button (click)="toggleStatus(task)" class="text-outline hover:text-primary transition-colors">
+                      <span class="material-symbols-outlined text-lg" [class.text-tertiary]="task.status === 'Done'">
+                        {{ task.status === 'Done' ? 'check_circle' : 'radio_button_unchecked' }}
+                      </span>
+                    </button>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <p class="font-label-md text-label-md text-on-surface">{{ task.title }}</p>
+                    <p class="font-label-sm text-label-sm text-outline line-clamp-1">{{ task.description || 'No description' }}</p>
+                  </td>
+                  <td class="px-4 py-3.5 hidden md:table-cell">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">{{ getProjectName(task.projectId) }}</span>
+                  </td>
+                  <td class="px-4 py-3.5 hidden sm:table-cell">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">{{ task.dueDate | date:'MMM d, y' }}</span>
+                  </td>
+                  <td class="px-4 py-3.5 hidden lg:table-cell">
+                    <span class="font-label-sm text-label-sm px-2.5 py-1 rounded-md" [class]="priorityClass(task.priority)">{{ task.priority }}</span>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <span class="font-label-sm text-label-sm px-2.5 py-1 rounded-md whitespace-nowrap" [class]="statusClass(task.status)">{{ task.status }}</span>
+                  </td>
+                  <td class="px-5 py-3.5 text-right">
+                    <div class="flex items-center justify-end gap-1">
+                      <button (click)="openEditModal(task)" class="p-1.5 rounded-lg hover:bg-secondary-container/40 text-outline hover:text-secondary transition-all" title="Edit task">
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                      </button>
+                      <button (click)="deleteTask(task.id)" class="p-1.5 rounded-lg hover:bg-error-container/30 text-outline hover:text-error transition-all" title="Delete task">
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPages > 1) {
+          <div class="flex items-center justify-between px-5 py-3.5 border-t border-outline-variant bg-surface-container-low">
+            <span class="font-label-sm text-label-sm text-outline">Page {{ currentPage }} of {{ totalPages }}</span>
+            <div class="flex items-center gap-1">
+              <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1" class="px-2.5 py-1.5 rounded-lg font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container-high transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                Previous
+              </button>
+              @for (page of pageNumbers; track page) {
+                <button (click)="goToPage(page)" class="w-8 h-8 rounded-lg font-label-sm text-label-sm transition-colors" [class.bg-primary-container/10]="page === currentPage" [class.text-primary]="page === currentPage" [class.text-on-surface-variant]="page !== currentPage" [class.hover:bg-surface-container-high]="page !== currentPage">{{ page }}</button>
+              }
+              <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages" class="px-2.5 py-1.5 rounded-lg font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container-high transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                Next
+              </button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </div>
+}
+
+@if (showModal) {
+  <div class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4" (click)="showModal = false">
+    <div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-2xl w-full max-w-lg p-6" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-headline-sm text-headline-sm text-on-surface">{{ editingTask ? 'Edit Task' : 'New Task' }}</h2>
+        <button (click)="showModal = false" class="p-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form [formGroup]="taskForm" (ngSubmit)="saveTask()" class="space-y-4">
+        <div>
+          <label class="font-label-md text-label-md text-on-surface mb-1.5 block" for="task-title">Title</label>
+          <input class="w-full px-3 py-2.5 rounded-lg border border-outline-variant focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none transition-all font-body-md text-body-md bg-white" id="task-title" formControlName="title" placeholder="Enter task title" />
+        </div>
+        <div>
+          <label class="font-label-md text-label-md text-on-surface mb-1.5 block" for="task-desc">Description</label>
+          <textarea class="w-full px-3 py-2.5 rounded-lg border border-outline-variant focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none transition-all font-body-md text-body-md bg-white min-h-[80px]" id="task-desc" formControlName="description" placeholder="Optional description"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="font-label-md text-label-md text-on-surface mb-1.5 block" for="task-project">Project</label>
+            <div class="relative">
+              <select class="appearance-none w-full px-3 py-2.5 rounded-lg border border-outline-variant bg-white font-body-md text-body-md text-on-surface outline-none focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 transition-all cursor-pointer" id="task-project" formControlName="projectId">
+                <option value="0" disabled>Select project</option>
+                @for (project of projects; track project.id) {
+                  <option [value]="project.id">{{ project.name }}</option>
+                }
+              </select>
+              <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none">expand_more</span>
+            </div>
+          </div>
+          <div>
+            <label class="font-label-md text-label-md text-on-surface mb-1.5 block" for="task-priority">Priority</label>
+            <div class="relative">
+              <select class="appearance-none w-full px-3 py-2.5 rounded-lg border border-outline-variant bg-white font-body-md text-body-md text-on-surface outline-none focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 transition-all cursor-pointer" id="task-priority" formControlName="priority">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none">expand_more</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="font-label-md text-label-md text-on-surface mb-1.5 block" for="task-due">Due Date</label>
+          <input class="w-full px-3 py-2.5 rounded-lg border border-outline-variant focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none transition-all font-body-md text-body-md bg-white" id="task-due" formControlName="dueDate" type="date" />
+        </div>
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" (click)="showModal = false" class="px-4 py-2 rounded-lg border border-outline-variant font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-colors">Cancel</button>
+          <button type="submit" [disabled]="taskForm.invalid || saving" class="px-5 py-2 bg-primary-container text-white rounded-lg font-label-md text-label-md shadow-md hover:bg-[#1e4db7] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            @if (saving) {
+              <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+            } @else {
+              <span class="material-symbols-outlined text-lg">{{ editingTask ? 'save' : 'add' }}</span>
+            }
+            {{ editingTask ? 'Save Changes' : 'Create Task' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
